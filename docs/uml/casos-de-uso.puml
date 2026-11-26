@@ -1,0 +1,52 @@
+@startuml casos-de-uso
+title Sistema Web de Controle de Frequência — New Center Informática\nDiagrama de Casos de Uso
+left to right direction
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #F5F9FF
+  BorderColor #1E3A5F
+}
+
+actor "Recepção /\nAtendente" as Recepcao
+actor "Professor" as Professor
+actor "Proprietário" as Proprietario
+
+Proprietario --|> Recepcao
+
+rectangle "Sistema de Frequência" {
+  usecase "Cadastrar aluno" as UC01
+  usecase "Cadastrar turma" as UC02
+  usecase "Matricular aluno" as UC03
+  usecase "Validar regras de matrícula\n(RN01 capacidade 20 · RN02 cota 5 avançados\nRN04 limite por aluno · RN06 ciclo aberto)" as UC03a
+  usecase "Cancelar matrícula\n(com motivo, libera vaga)" as UC04
+  usecase "Registrar chamada\n(1ª e 2ª hora)" as UC05
+  usecase "Consultar histórico\nde chamadas" as UC06
+  usecase "Consultar faltosos\n(Painel)" as UC07
+  usecase "Abrir WhatsApp /\ncopiar telefone" as UC07a
+  usecase "Registrar contato" as UC08
+}
+
+Recepcao --> UC01
+Recepcao --> UC03
+Recepcao --> UC04
+Recepcao --> UC06
+Recepcao --> UC07
+Recepcao --> UC08
+
+Professor --> UC05
+Professor --> UC06
+
+Proprietario --> UC02
+
+UC03 ..> UC03a : <<include>>
+UC07a ..> UC07 : <<extend>>
+UC08 ..> UC07 : <<extend>>
+UC04 ..> UC07 : <<extend>>
+
+note right of UC07
+  Tela inicial (prioridade máxima).
+  2 faltas seguidas = ATENÇÃO (lembrete)
+  3+ faltas seguidas = CRÍTICO (retornar ou cancelar)
+end note
+@enduml

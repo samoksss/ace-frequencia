@@ -1,0 +1,220 @@
+@startuml classes
+title Sistema Web de Controle de Frequência — Diagrama de Classes do Domínio
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam shadowing false
+hide empty members
+
+package "domain.vo" <<Rectangle>> {
+  class NumeroMatricula <<value object>> {
+    + valor : String
+  }
+  class Telefone <<value object>> {
+    + digitos : String
+    + formatado() : String
+    + paraWhatsApp() : String
+  }
+  class Horario <<value object>> {
+    + inicio : LocalTime
+    + fim : LocalTime
+    + turno() : Turno
+    + descricao() : String
+  }
+}
+
+package "domain.model" <<Rectangle>> {
+  class Aluno <<aggregate root>> {
+    - numeroMatricula : NumeroMatricula
+    - nome : String
+    - telefone : Telefone
+    - observacao : String
+  }
+
+  class Curso {
+    - nome : String
+    - categoria : CategoriaCurso
+    - rapido : boolean
+    + isAvancado() : boolean
+    + duracaoMeses() : int
+  }
+
+  class Ciclo {
+    - nome : String
+    - corHex : String
+    - dataInicio : LocalDate
+    - dataPrevistaTermino : LocalDate
+    - aceitaMatriculas : boolean
+    + encerrarMatriculas()
+  }
+
+  class Turma <<aggregate root>> {
+    + {static} CAPACIDADE_MAXIMA = 20
+    + {static} LIMITE_AVANCADOS = 5
+    - diaSemana : DayOfWeek
+    - horario : Horario
+    + matricular(aluno, curso, ciclo, data, ativasDoAluno, validador) : Matricula
+    + matriculasAtivas() : List<Matricula>
+    + ocupacao() : int
+    + avancadosAtivos() : int
+    + isLotada() : boolean
+    + turno() : Turno
+    + nome() : String
+  }
+
+  class Matricula {
+    - dataInicio : LocalDate
+    - dataPrevistaTermino : LocalDate
+    - status : StatusMatricula
+    - motivoCancelamento : String
+    - dataCancelamento : LocalDate
+    + cancelar(motivo, data)
+    + isAtiva() : boolean
+    + isAvancada() : boolean
+  }
+
+  class Aula <<aggregate root>> {
+    - data : LocalDate
+    + {static} abrir(turma, data, hoje) : Aula
+    + registrar(matricula, h1, h2, agora) : RegistroFrequencia
+    + marcarTodosPresentes(agora)
+    + incluirMatriculasAtivasSemRegistro()
+  }
+
+  class RegistroFrequencia {
+    - primeiraHora : Presenca
+    - segundaHora : Presenca
+    - atualizadoEm : LocalDateTime
+    + registrar(h1, h2, agora)
+    + resultado() : ResultadoAula
+    + isFalta() : boolean
+  }
+
+  class Contato {
+    - dataHora : LocalDateTime
+    - canal : CanalContato
+    - resultado : ResultadoContato
+    - observacao : String
+  }
+
+  enum CategoriaCurso {
+    BASICO
+    AVANCADO
+  }
+  enum StatusMatricula {
+    ATIVA
+    CANCELADA
+    CONCLUIDA
+  }
+  enum Presenca {
+    PRESENTE
+    FALTA
+  }
+  enum ResultadoAula {
+    PRESENTE
+    PARCIAL
+    FALTA
+  }
+  enum Turno {
+    MANHA
+    TARDE
+    NOITE
+  }
+  enum NivelAlerta {
+    NENHUM
+    ATENCAO
+    CRITICO
+  }
+  enum CanalContato {
+    WHATSAPP
+    LIGACAO
+    PRESENCIAL
+  }
+  enum ResultadoContato {
+    LEMBRETE_ENVIADO
+    VAI_RETORNAR
+    SEM_RESPOSTA
+    AVISOU_FALTA
+    QUER_CANCELAR
+  }
+}
+
+package "domain.regra  (Strategy + Composite)" <<Rectangle>> {
+  interface RegraMatricula <<strategy>> {
+    + validar(s : SolicitacaoMatricula)
+  }
+  class SolicitacaoMatricula <<record>> {
+    turma, aluno, curso, ciclo
+    matriculasAtivasDoAluno
+  }
+  class ValidadorMatricula <<composite>> {
+    + {static} padrao() : ValidadorMatricula
+  }
+  class CapacidadeMaximaRegra <<RN01/RN03>>
+  class CotaAvancadoRegra <<RN02>>
+  class LimiteMatriculasPorAlunoRegra <<RN04>>
+  class CicloAceitaMatriculaRegra <<RN06>>
+}
+
+package "domain.service  (Pure Fabrication + Strategy)" <<Rectangle>> {
+  class CalculadoraFaltas {
+    + calcular(historico) : SituacaoFrequencia
+  }
+  interface CriterioAlerta <<strategy>> {
+    + contar(historico) : int
+  }
+  class FaltasConsecutivasCriterio <<RN09>>
+  class TotalFaltasCriterio
+  class LimitesAlerta <<record>> {
+    atencao = 2
+    critico = 3
+    + nivelPara(faltas) : NivelAlerta
+  }
+  class SituacaoFrequencia <<record>> {
+    faltasConsecutivas, totalFaltas
+    ultimaPresenca, nivel
+  }
+  class FrequenciaNaAula <<record>> {
+    data, resultado
+  }
+}
+
+' --- associações do domínio ---
+Aluno *-- NumeroMatricula
+Aluno *-- Telefone
+Turma *-- Horario
+Turma "1" *-- "0..*" Matricula : matriculas >
+Matricula "0..*" --> "1" Aluno
+Matricula "0..*" --> "1" Curso
+Matricula "0..*" --> "1" Ciclo
+Aula "0..*" --> "1" Turma
+Aula "1" *-- "0..*" RegistroFrequencia : registros >
+RegistroFrequencia "0..*" --> "1" Matricula
+Contato "0..*" --> "1" Matricula
+Curso --> CategoriaCurso
+Matricula --> StatusMatricula
+RegistroFrequencia --> Presenca
+RegistroFrequencia ..> ResultadoAula
+Horario ..> Turno
+Contato --> CanalContato
+Contato --> ResultadoContato
+
+' --- regras ---
+RegraMatricula <|.. ValidadorMatricula
+RegraMatricula <|.. CapacidadeMaximaRegra
+RegraMatricula <|.. CotaAvancadoRegra
+RegraMatricula <|.. LimiteMatriculasPorAlunoRegra
+RegraMatricula <|.. CicloAceitaMatriculaRegra
+ValidadorMatricula o-- "1..*" RegraMatricula : regras
+RegraMatricula ..> SolicitacaoMatricula
+Turma ..> RegraMatricula : usa ao matricular
+
+' --- faltas ---
+CalculadoraFaltas --> LimitesAlerta
+CalculadoraFaltas --> CriterioAlerta
+CriterioAlerta <|.. FaltasConsecutivasCriterio
+CriterioAlerta <|.. TotalFaltasCriterio
+CalculadoraFaltas ..> FrequenciaNaAula
+CalculadoraFaltas ..> SituacaoFrequencia
+LimitesAlerta ..> NivelAlerta
+FrequenciaNaAula ..> ResultadoAula
+@enduml
