@@ -1,0 +1,21 @@
+# Build
+target/
+*.class
+
+# Banco H2 local (dados de execução)
+data/
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# macOS
+.DS_Store
+
+# Nunca versionar a planilha real da New Center (LGPD)
+*.xls
+*.xlsx

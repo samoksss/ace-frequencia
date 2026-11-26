@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: frequencia
+  profiles:
+    default: dev
+  datasource:
+    # H2 em arquivo: os dados persistem entre execuções (pasta ./data, fora do Git)
+    url: jdbc:h2:file:./data/frequencia;AUTO_SERVER=TRUE
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+# RN09 - limites do alerta de faltas consecutivas
+frequencia:
+  alerta:
+    atencao: 2
+    critico: 3

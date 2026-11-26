@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    # Testes usam banco em memória para não sujar ./data
+    url: jdbc:h2:mem:testes;DB_CLOSE_DELAY=-1
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+frequencia:
+  alerta:
+    atencao: 2
+    critico: 3
