@@ -92,6 +92,19 @@ class MatriculaEAulaTest {
         }
 
         @Test
+        @DisplayName("chamada nova começa com todos PRESENTE; o professor marca só as faltas")
+        void comecaComTodosPresentes() {
+            Turma turma = Cenario.segunda09();
+            Cenario.preencher(turma, BASICO, 3);
+            Aula aula = Aula.abrir(turma, SEGUNDA, HOJE);
+            assertTrue(aula.getRegistros().stream().allMatch(r -> r.resultado() == ResultadoAula.PRESENTE));
+
+            Matricula faltou = turma.matriculasAtivas().get(1);
+            aula.registrar(faltou, Presenca.FALTA, Presenca.FALTA, AGORA);
+            assertEquals(1L, aula.getRegistros().stream().filter(RegistroFrequencia::isFalta).count());
+        }
+
+        @Test
         @DisplayName("todos presentes, depois correção de um aluno guardando atualizadoEm")
         void registrarECorrigir() {
             Turma turma = Cenario.segunda09();

@@ -19,10 +19,10 @@ import java.util.Optional;
 public class Aula {
 
     /**
-     * Marcação inicial de uma chamada nova: o professor marca quem está presente
-     * (ou usa "todos presentes"). Decisão de interface registrada no DIARIO.md.
+     * Marcação inicial de uma chamada nova: todos começam PRESENTE e o professor marca só as faltas
+     * (decisão da equipe em 26/11, registrada no DIARIO.md).
      */
-    static final Presenca MARCACAO_INICIAL = Presenca.FALTA;
+    static final Presenca MARCACAO_INICIAL = Presenca.PRESENTE;
 
     private final Long id;
     private final Turma turma;

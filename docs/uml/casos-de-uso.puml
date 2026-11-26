@@ -28,6 +28,7 @@ rectangle "Sistema de Frequência" {
 }
 
 Recepcao --> UC01
+Recepcao --> UC02
 Recepcao --> UC03
 Recepcao --> UC04
 Recepcao --> UC06
@@ -37,7 +38,10 @@ Recepcao --> UC08
 Professor --> UC05
 Professor --> UC06
 
-Proprietario --> UC02
+note left of Proprietario
+  Usa o mesmo PC da recepção:
+  herda todos os casos de uso dela.
+end note
 
 UC03 ..> UC03a : <<include>>
 UC07a ..> UC07 : <<extend>>

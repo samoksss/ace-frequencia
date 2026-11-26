@@ -15,9 +15,11 @@ Registro curto de cada sessão: o que foi feito, decisões e dificuldades. Serve
 
 **Decisões:**
 - O domínio **não depende de Spring nem de JPA**: compila e é testado sozinho. A persistência (sprint 1) vai usar entidades JPA separadas na `infrastructure`, mapeadas para o domínio pelos adaptadores.
-- Uma chamada nova começa com todos em FALTA: o professor marca quem veio ou usa "todos presentes". *(Confirmar com a equipe/New Center.)*
-- O ator Proprietário herda as permissões da Recepção e também cadastra turmas.
+- Uma chamada nova começa com **todos PRESENTE** e o professor marca só as faltas. A primeira versão começava com todos em FALTA; a equipe (Marcos Felipe) preferiu o contrário, porque é mais rápido no dia a dia.
+- A **Recepção também cadastra turmas**, já que as matrículas são feitas lá. O Proprietário usa o mesmo PC da recepção e por isso herda todos os casos de uso dela (generalização no diagrama).
 - As regras são avaliadas na ordem ciclo → limite por aluno → capacidade → cota de avançados. A primeira violação interrompe a matrícula com uma mensagem pronta para a recepção.
 
 **Dificuldades:**
 - Parte do código foi escrita com apoio de IA (Claude) num ambiente sem acesso ao Maven Central nem ao PlantUML. Lá, o domínio e os testes foram conferidos só com o compilador Java, e o build Maven e a geração dos PNGs ficaram para o MacBook.
+- No MacBook foi preciso instalar o ambiente do zero (Homebrew, Java 21, Maven, PlantUML). O Maven veio com um Java 27 como dependência e passou a usá-lo no lugar do 21; resolvemos fixando o JAVA_HOME no Java 21.
+- Repositório publicado no GitHub (público): https://github.com/samoksss/ace-frequencia. Os testes rodaram no Mac: 39 testes, BUILD SUCCESS.
