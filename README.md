@@ -31,6 +31,24 @@ mvn spring-boot:run   # sobe em http://localhost:8080
 - Swagger UI: http://localhost:8080/swagger-ui.html
 - Console H2: http://localhost:8080/h2-console (JDBC URL `jdbc:h2:file:./data/frequencia`, usuário `sa`)
 
+## API REST (base `/api`)
+
+Documentação interativa no Swagger UI (`/swagger-ui.html`).
+
+| Método | Rota | Função |
+|---|---|---|
+| GET/POST | `/cursos` | Listar / cadastrar curso |
+| GET/POST | `/ciclos` · GET/PUT `/ciclos/{id}` | Ciclos por cor (Laranja pode ser marcado como "não aceita matrículas") |
+| GET/POST | `/turmas` (`?turno=&diaSemana=`) · GET/PUT `/turmas/{id}` | Turmas com ocupação (`14/20 · avançados 3/5`) |
+| GET | `/turmas/{id}/matriculas` | Alunos ativos da turma |
+| GET/POST | `/alunos` (`?busca=`) · GET/PUT `/alunos/{numeroMatricula}` | Alunos (409 se o número já existir) |
+| POST | `/matriculas` | Matricular (422 se violar RN01, RN02, RN04 ou RN06) |
+| PATCH | `/matriculas/{id}/cancelamento` | Cancelar com motivo (libera a vaga) |
+| GET/PUT | `/turmas/{id}/chamadas/{data}` | Chamada do dia (todos começam PRESENTE) / salvar ou corrigir |
+| GET | `/turmas/{id}/chamadas?de=&ate=` | Histórico em grade |
+
+Erros sempre no formato `{timestamp, status, erro, mensagem, campos}`: **400** validação, **404** não encontrado, **409** duplicado, **422** regra de negócio (o código da regra vem em `campos.regra`).
+
 ## Regras de negócio
 
 | Código | Regra |
@@ -59,9 +77,9 @@ br.unicatolica.ace.frequencia
 │   ├── regra         RegraMatricula + implementações, ValidadorMatricula
 │   ├── service       CalculadoraFaltas, CriterioAlerta
 │   └── exception     RegraNegocioException (422), DadoInvalidoException (400)
-├── application       casos de uso + portas (interfaces de repositório)
-├── infrastructure    JPA/H2, adaptadores das portas, dados fictícios
-└── web               controllers REST, DTOs, tratamento de erros
+├── application       casos de uso (Java puro) + portas (interfaces de repositório)
+├── infrastructure    entidades JPA, adaptadores das portas, montagem dos casos de uso (CasosDeUsoConfig)
+└── web               controllers REST, DTOs (records), ErroHandler, OpenAPI
 ```
 
 Diagramas em `docs/uml/` (casos de uso e classes; sequência na sprint de fechamento).
